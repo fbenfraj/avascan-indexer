@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Block, ethers } from 'ethers';
+import { Block, BlockParams, ethers } from 'ethers';
 
 @Injectable()
 export class HttpService {
@@ -34,5 +34,24 @@ export class HttpService {
     }
 
     return await Promise.all(promises);
+  }
+
+  wssBlockToEthersBlock(wssBlock: WssBlock): Block {
+    const blockParams: BlockParams = {
+      number: parseInt(wssBlock.number, 16),
+      timestamp: parseInt(wssBlock.timestamp, 16),
+      nonce: wssBlock.nonce,
+      difficulty: BigInt(wssBlock.difficulty),
+      gasLimit: BigInt(wssBlock.gasLimit),
+      gasUsed: BigInt(wssBlock.gasUsed),
+      miner: wssBlock.miner,
+      extraData: wssBlock.extraData,
+      parentHash: wssBlock.parentHash,
+      hash: wssBlock.hash,
+      baseFeePerGas: BigInt(wssBlock.baseFeePerGas),
+      transactions: [],
+    };
+
+    return new Block(blockParams, this.provider);
   }
 }

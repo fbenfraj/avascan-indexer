@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Block } from 'ethers';
 import { RawData } from 'ws';
 import { DbService } from './db/db.service';
 import { HttpService } from './http/http.service';
@@ -18,7 +19,10 @@ export class AppService {
       const block: WssBlock = await this.wssService.getBlockFromData(data);
 
       if (block) {
-        // TODO: Save block to the database
+        const ethersBlock: Block =
+          this.httpService.wssBlockToEthersBlock(block);
+
+        this.dbService.saveBlocks([ethersBlock]);
       }
     });
   }
