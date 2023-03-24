@@ -22,7 +22,14 @@ export class AppService {
         const ethersBlock: Block =
           this.httpService.wssBlockToEthersBlock(block);
 
-        // this.dbService.saveBlocks([ethersBlock]);
+        this.dbService.saveBlocks([ethersBlock]);
+
+        const transactions =
+          await this.httpService.fetchTransactionsConcurrently([
+            ethersBlock.hash,
+          ]);
+
+        this.dbService.saveTransactions(transactions);
       }
     });
   }
