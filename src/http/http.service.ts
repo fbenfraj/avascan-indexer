@@ -6,10 +6,13 @@ import { Block, BlockParams, ethers } from 'ethers';
 export class HttpService {
   private AVA_RPC_URL = `https://avalanche-mainnet.infura.io/v3`;
   public provider: ethers.JsonRpcProvider;
+  private readonly COVALENT_API_URL = 'https://api.covalenthq.com/v1';
+  private COVALENT_API_KEY: string;
 
   constructor(private configService: ConfigService) {
     const INFURA_API_KEY = this.configService.get('INFURA_API_KEY');
 
+    this.COVALENT_API_KEY = this.configService.get('COVALENT_API_KEY');
     this.provider = new ethers.JsonRpcProvider(
       `${this.AVA_RPC_URL}/${INFURA_API_KEY}`,
     );
@@ -34,6 +37,57 @@ export class HttpService {
     }
 
     return await Promise.all(promises);
+  }
+
+  // Fast implementation using Covalent API
+  async getTransactionsFromAddress(chainName: string, address: string) {
+    try {
+      const url = `${this.COVALENT_API_URL}/${chainName}/address/${address}/transactions_v2/?key=${this.COVALENT_API_KEY}`;
+      const response = await fetch(url);
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data && data.data && data.data.items) {
+          return data.data.items;
+        } else {
+          throw new Error(`Unable to fetch transactions for wallet ${address}`);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(
+          `HTTP error ${response.status}: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error.message);
+      throw error;
+    }
+  }
+
+  // Slow implementation that checks all blocks in the blockchain
+  // This function is kept for demonstration purposes to show that the functionality
+  // can be implemented without relying on a third-party service like Covalent
+  async getTransactionsByAddressSlow(address: string) {
+    const currentBlockNumber = await this.provider.getBlockNumber();
+    const targetAddress = address.toLowerCase();
+    let transactions = [];
+
+    for (let i = currentBlockNumber; i >= 0; i--) {
+      const block = await this.provider.getBlock(i, true);
+      const matchedTransactions = block.transactions.filter(
+        (tx) => tx.toLowerCase() === targetAddress,
+      );
+      transactions = transactions.concat(matchedTransactions);
+
+      // Optional: break the loop reached a block number where the wallet was created
+      // if (block.number <= walletCreationBlockNumber) {
+      //   break;
+      // }
+    }
+
+    return transactions;
   }
 
   wssBlockToEthersBlock(wssBlock: WssBlock): Block {

@@ -22,7 +22,7 @@ export class AppService {
         const ethersBlock: Block =
           this.httpService.wssBlockToEthersBlock(block);
 
-        this.dbService.saveBlocks([ethersBlock]);
+        // this.dbService.saveBlocks([ethersBlock]);
       }
     });
   }
@@ -38,6 +38,6 @@ export class AppService {
       endBlock,
     );
 
-    this.dbService.saveBlocks(blocks);
+    // this.dbService.saveBlocks(blocks);
   }
 }
