@@ -40,7 +40,10 @@ export class HttpService {
   }
 
   // Fast implementation using Covalent API
-  async getTransactionsFromAddress(chainName: string, address: string) {
+  async getTransactionsFromAddress(
+    chainName: string,
+    address: string,
+  ): Promise<CovalentTransaction[]> {
     try {
       const url = `${this.COVALENT_API_URL}/${chainName}/address/${address}/transactions_v2/?key=${this.COVALENT_API_KEY}`;
       const response = await fetch(url);
@@ -69,7 +72,7 @@ export class HttpService {
   // Slow implementation that checks all blocks in the blockchain
   // This function is kept for demonstration purposes to show that the functionality
   // can be implemented without relying on a third-party service like Covalent
-  async getTransactionsByAddressSlow(address: string) {
+  async getTransactionsFromAddressSlow(address: string) {
     const currentBlockNumber = await this.provider.getBlockNumber();
     const targetAddress = address.toLowerCase();
     let transactions = [];
@@ -88,6 +91,25 @@ export class HttpService {
     }
 
     return transactions;
+  }
+
+  async getTransactionCountFromAddress(network: string, address: string) {
+    const transactions: CovalentTransaction[] =
+      await this.getTransactionsFromAddress(network, address);
+
+    const sentTransactions = transactions.filter(
+      (transaction) =>
+        transaction.from_address.toLowerCase() === address.toLowerCase(),
+    );
+    const receivedTransactions = transactions.filter(
+      (transaction) =>
+        transaction.to_address.toLowerCase() === address.toLowerCase(),
+    );
+
+    return {
+      sent: sentTransactions.length,
+      received: receivedTransactions.length,
+    };
   }
 
   wssBlockToEthersBlock(wssBlock: WssBlock): Block {
