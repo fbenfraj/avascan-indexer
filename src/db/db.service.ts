@@ -5,7 +5,8 @@ import {
   EntityManager,
 } from '@mikro-orm/postgresql';
 import { Injectable, Logger } from '@nestjs/common';
-import { Block } from 'ethers';
+import { Block, TransactionResponse } from 'ethers';
+import { TransactionEntity } from 'src/entities/TransactionEntity';
 import { BlockEntity } from '../entities/BlockEntity';
 
 @Injectable()
@@ -38,7 +39,29 @@ export class DbService {
         this.logger.log(`Saved ${log}`);
       });
     } catch (error) {
-      console.error(`Error with saving ${log} to the database. Error: `, error);
+      this.logger.error(
+        `Error with saving ${log} to the database. Error: `,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async saveTransactions(transactions: TransactionResponse[]): Promise<void> {
+    try {
+      await this.emFork.transactional(async (transactionalEntityManager) => {
+        const transactionEntities = transactions.map((transaction) => {
+          return this.emFork.create(TransactionEntity, transaction);
+        });
+
+        await transactionalEntityManager.persist(transactionEntities).flush();
+        this.logger.log(`Saved ${transactions.length} transactions`);
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error with saving transactions to the database. Error: `,
+        error,
+      );
       throw error;
     }
   }

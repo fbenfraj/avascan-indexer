@@ -3,13 +3,10 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 @Entity()
 export class BlockEntity {
   @PrimaryKey()
-  id: number;
+  hash!: string;
 
   @Property()
   number!: number;
-
-  @Property()
-  hash!: string;
 
   @Property()
   timestamp!: number;

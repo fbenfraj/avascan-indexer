@@ -37,7 +37,13 @@ export class AppService {
       startBlock,
       endBlock,
     );
+    const blockHashes = blocks.map((block) => block.hash);
 
-    // this.dbService.saveBlocks(blocks);
+    this.dbService.saveBlocks(blocks);
+    const transactions = await this.httpService.fetchTransactionsConcurrently(
+      blockHashes,
+    );
+
+    this.dbService.saveTransactions(transactions);
   }
 }

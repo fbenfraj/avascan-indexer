@@ -26,6 +26,20 @@ export class HttpService {
     return await this.provider.getBlock(blockNumber);
   }
 
+  async getTransactionsFromBlock(
+    blockNumber: number,
+  ): Promise<ethers.TransactionResponse[]> {
+    const block = await this.getBlock(blockNumber);
+    const transactions: ethers.TransactionResponse[] = [];
+
+    for (const txHash of block.transactions) {
+      const tx = await this.provider.getTransaction(txHash);
+      transactions.push(tx);
+    }
+
+    return transactions;
+  }
+
   async fetchBlockConcurrently(
     startBlock: number,
     endBlock: number,
@@ -34,6 +48,22 @@ export class HttpService {
 
     for (let i = startBlock; i <= endBlock; i++) {
       promises.push(this.getBlock(i));
+    }
+
+    return await Promise.all(promises);
+  }
+
+  async fetchTransactionsConcurrently(
+    blockHashes: string[],
+  ): Promise<ethers.TransactionResponse[]> {
+    const promises: Promise<ethers.TransactionResponse>[] = [];
+
+    for (const blockHash of blockHashes) {
+      const block = await this.provider.getBlock(blockHash, true);
+      for (const txHash 
+        of block.transactions) {
+        promises.push(this.provider.getTransaction(txHash));
+      }
     }
 
     return await Promise.all(promises);
