@@ -23,12 +23,18 @@ export class AppController {
   }
 
   @Get('sorted')
-  async getTransactionsSortedByValue(@Query('order') order: 'asc' | 'desc') {
+  async getTransactionsSortedByValue(
+    @Query('order') order: 'asc' | 'desc',
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
     this.logger.log(
       `Fetching transactions sorted by value in ${order || 'desc'} order`,
     );
     const transactions = await this.dbService.getTransactionsSortedByValue(
       order,
+      limit,
+      limit * (page - 1),
     );
     return transactions;
   }

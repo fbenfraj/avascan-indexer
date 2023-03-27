@@ -177,14 +177,22 @@ export class DbService {
   /**
    * Get transactions sorted by value (amount of $AVAX moved) in ascending or descending order.
    * @param order The order in which to sort the transactions, either 'asc' or 'desc'.
+   * @param limit The maximum number of transactions to return per page.
+   * @param offset The number of transactions to skip before beginning to return results.
    * @returns A list of sorted transactions.
    */
   async getTransactionsSortedByValue(
     order: 'asc' | 'desc',
+    limit: number = 10,
+    offset: number = 0,
   ): Promise<TransactionEntity[]> {
     try {
       const qb = this.emFork.createQueryBuilder(TransactionEntity);
-      const query = qb.select('*').orderBy({ value: order || 'desc' });
+      const query = qb
+        .select('*')
+        .orderBy({ value: order || 'desc' })
+        .limit(limit)
+        .offset(offset);
 
       const transactions = await query.execute();
 
