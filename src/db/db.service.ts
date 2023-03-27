@@ -8,6 +8,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Block, TransactionResponse } from 'ethers';
 import { TransactionEntity } from '../entities/TransactionEntity';
 import { BlockEntity } from '../entities/BlockEntity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DbService {
@@ -15,9 +16,14 @@ export class DbService {
     AbstractSqlDriver<AbstractSqlConnection, AbstractSqlPlatform>
   >;
   private readonly logger = new Logger(DbService.name);
+  private readonly dbLogsOn: number;
 
-  constructor(private readonly em: EntityManager) {
+  constructor(
+    private readonly em: EntityManager,
+    private configService: ConfigService,
+  ) {
     this.emFork = this.em.fork();
+    this.dbLogsOn = Number(this.configService.get<string>('DB_LOGS_ON')) || 1;
   }
 
   /**
@@ -43,7 +49,9 @@ export class DbService {
 
         await transactionalEntityManager.persist(blockEntities).flush();
 
-        this.logger.log(`Saved ${log}`);
+        if (this.dbLogsOn) {
+          this.logger.log(`Saved ${log}`);
+        }
       });
     } catch (error) {
       this.logger.error(
@@ -85,7 +93,11 @@ export class DbService {
               }`
             : `block ${treatedBlocks}`;
 
-        this.logger.log(`Saved ${transactions.length} transactions for ${log}`);
+        if (this.dbLogsOn) {
+          this.logger.log(
+            `Saved ${transactions.length} transactions for ${log}`,
+          );
+        }
       });
     } catch (error) {
       this.logger.error(
