@@ -152,8 +152,7 @@ export class DbService {
         received: receivedTransactions.length,
       };
     } catch (error) {
-      const logger = new Logger('getTransactionCountFromAddress');
-      logger.error(
+      this.logger.error(
         `Failed to get transaction count for address: ${address}`,
         error.stack,
       );
@@ -177,8 +176,7 @@ export class DbService {
 
       return transactions;
     } catch (error) {
-      const logger = new Logger('getTransactionsSortedByValue');
-      logger.error(
+      this.logger.error(
         `Failed to get transactions sorted by value in ${order} order`,
         error.stack,
       );
@@ -209,8 +207,7 @@ export class DbService {
 
       return Array.from(allUniqueAddresses);
     } catch (error) {
-      const logger = new Logger('getAllUniqueAddresses');
-      logger.error('Failed to get all unique addresses', error.stack);
+      this.logger.error('Failed to get all unique addresses', error.stack);
       throw error;
     }
   }
