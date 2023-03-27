@@ -6,7 +6,7 @@ import {
 } from '@mikro-orm/postgresql';
 import { Injectable, Logger } from '@nestjs/common';
 import { Block, TransactionResponse } from 'ethers';
-import { TransactionEntity } from 'src/entities/TransactionEntity';
+import { TransactionEntity } from '../entities/TransactionEntity';
 import { BlockEntity } from '../entities/BlockEntity';
 
 @Injectable()
