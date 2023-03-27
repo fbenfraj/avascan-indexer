@@ -23,14 +23,19 @@ export class WssService {
    * Subscribes to the 'newHeads' event to receive information about new blocks.
    */
   private subscribeToNewHeads() {
-    const payload = {
-      id: 1,
-      jsonrpc: '2.0',
-      method: 'eth_subscribe',
-      params: ['newHeads'],
-    };
+    try {
+      const payload = {
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'eth_subscribe',
+        params: ['newHeads'],
+      };
 
-    this.webSocket.send(JSON.stringify(payload));
+      this.webSocket.send(JSON.stringify(payload));
+    } catch (error) {
+      this.logger.error('Failed to subscribe to newHeads event', error.stack);
+      throw error;
+    }
   }
 
   /**
@@ -41,11 +46,26 @@ export class WssService {
     return this.webSocket;
   }
 
+  /**
+   * Parses the raw data received from the WebSocket and returns the block data.
+   * @param data - The raw data received from the WebSocket.
+   * @returns The block data as a WssBlock object.
+   * @throws Error if the input data cannot be parsed or the message method is not 'eth_subscription'.
+   */
   async getBlockFromData(data: RawData): Promise<WssBlock> {
-    const message = JSON.parse(data.toString());
+    try {
+      const message = JSON.parse(data.toString());
 
-    if (message.method === 'eth_subscription') {
-      return message.params.result;
+      if (message.method === 'eth_subscription') {
+        return message.params.result;
+      } else {
+        throw new Error('Unexpected message method');
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to parse block data from WebSocket message: ${error}`,
+      );
+      throw error;
     }
   }
 }
