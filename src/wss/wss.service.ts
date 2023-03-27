@@ -56,11 +56,11 @@ export class WssService {
     try {
       const message = JSON.parse(data.toString());
 
-      if (message.method === 'eth_subscription') {
-        return message.params.result;
-      } else {
-        throw new Error('Unexpected message method');
+      if (message.method !== 'eth_subscription') {
+        return null;
       }
+
+      return message.params.result;
     } catch (error) {
       this.logger.error(
         `Failed to parse block data from WebSocket message: ${error}`,
