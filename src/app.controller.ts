@@ -1,8 +1,10 @@
-import { Controller, Get, Query, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Logger, UseFilters } from '@nestjs/common';
 import { DbService } from './db/db.service';
+import { CustomExceptionFilter } from './filters/custom-exception.filter';
 import { HttpService } from './http/http.service';
 
 @Controller('transactions')
+@UseFilters(CustomExceptionFilter)
 export class AppController {
   private readonly logger = new Logger(AppController.name);
 
