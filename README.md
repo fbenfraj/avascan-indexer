@@ -38,6 +38,12 @@ To deploy the Indexer and API on a local Docker environment, I used Docker Compo
 - WebSocket
 - Jest
 
+I chose NestJS for this technical test because of its robustness, scalability, and its use of TypeScript, which provides improved type safety, code consistency, and code readability. It also offers a powerful dependency injection system and a modular architecture, making it easier to test and maintain the codebase.
+
+I chose PostgreSQL and SQL for this test because of their proven reliability, transactional support, and strong consistency guarantees. Additionally, PostgreSQL offers features such as data replication, support for JSON data types, and robust indexing, which make it an ideal choice for storing large amounts of transactional data.
+
+I chose to use Infura for this test because it provides a reliable and scalable infrastructure for accessing blockchain data via their JSON-RPC APIs, without the need to run a local node. Additionally, Infura does not have rate limits, making it easier to handle high volumes of data and ensuring reliable data retrieval for the application.
+
 
 ## Endpoints
 
