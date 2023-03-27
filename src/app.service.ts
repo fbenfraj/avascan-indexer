@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Block } from 'ethers';
 import { RawData } from 'ws';
+import { CacheService } from './cache/cache.service';
 import { DbService } from './db/db.service';
 import { HttpService } from './http/http.service';
 import { WssService } from './wss/wss.service';
@@ -10,6 +11,7 @@ export class AppService {
   private readonly logger = new Logger(AppService.name);
 
   constructor(
+    private readonly cacheService: CacheService,
     private readonly httpService: HttpService,
     private readonly dbService: DbService,
     private readonly wssService: WssService,
@@ -24,14 +26,22 @@ export class AppService {
         const ethersBlock: Block =
           this.httpService.wssBlockToEthersBlock(block);
 
-        this.dbService.saveBlocks([ethersBlock]);
+        const uncachedBlocks = await this.cacheService.filterUncachedBlocks([
+          ethersBlock,
+        ]);
 
-        const transactions =
-          await this.httpService.fetchTransactionsConcurrently([
-            ethersBlock.hash,
-          ]);
+        this.dbService.saveBlocks(uncachedBlocks);
 
-        this.dbService.saveTransactions(transactions);
+        this.cacheService.cacheBlocks(uncachedBlocks);
+
+        if (uncachedBlocks.length !== 0) {
+          const transactions =
+            await this.httpService.fetchTransactionsConcurrently([
+              ethersBlock.hash,
+            ]);
+
+          this.dbService.saveTransactions(transactions);
+        }
       }
     });
   }
@@ -51,14 +61,21 @@ export class AppService {
         startBlock,
         endBlock,
       );
+
+      const uncachedBlocks: Block[] =
+        await this.cacheService.filterUncachedBlocks(blocks);
+
+      await this.dbService.saveBlocks(uncachedBlocks);
+
+      this.cacheService.cacheBlocks(uncachedBlocks);
+
       const blockHashes = blocks.map((block) => block.hash);
 
-      await this.dbService.saveBlocks(blocks);
-
-      const transactions = await this.httpService.fetchTransactionsConcurrently(
-        blockHashes,
-      );
-      await this.dbService.saveTransactions(transactions);
+      if (uncachedBlocks.length !== 0) {
+        const transactions =
+          await this.httpService.fetchTransactionsConcurrently(blockHashes);
+        await this.dbService.saveTransactions(transactions);
+      }
     } catch (error) {
       this.logger.error(`Failed to process latest blocks: ${error}`);
     }
