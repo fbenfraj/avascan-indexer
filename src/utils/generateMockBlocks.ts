@@ -1,5 +1,12 @@
 import { Block } from 'ethers';
 
+/**
+ * Generate an array of mock `Block` objects.
+ *
+ * @param count The number of `Block` objects to generate.
+ *
+ * @returns An array of `Block` objects.
+ */
 export default function generateMockBlocks(count: number): Block[] {
   const blocks: Block[] = [];
 
