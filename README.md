@@ -14,6 +14,7 @@ This project consists of two parts, an Indexer and an API. The Indexer is a proc
 The goal is to demonstrate real-time transactions indexing for the Avalanche C-Chain blockchain and develop a performant API that can handle requests for transaction data. The indexer is able to retrieve transactions from the last 10,000 c-chain blocks and store them in an appropriate database. The API provides endpoints that allow users to query transactions made or received by a specific address, the number of transactions made or received by a specific address, a list of transactions sorted by value, and a list of 100 addresses with the largest balance that made or received a transaction.
 
 ## Problems
+
 Ensuring that the indexer process is robust enough to handle network disruptions and API rate limits, which can lead to missed transactions and inconsistencies in the database.
 Implementing the sorting and filtering logic for the API endpoints efficiently, considering the potentially large number of transactions that may need to be processed.
 Dealing with soft forks and maintaining data consistency in the database by marking forked blocks and handling potential hidden forks.
@@ -44,10 +45,10 @@ I chose PostgreSQL and SQL for this test because of their proven reliability, tr
 
 I chose to use Infura for this test because it provides a reliable and scalable infrastructure for accessing blockchain data via their JSON-RPC APIs, without the need to run a local node. Additionally, Infura does not have rate limits, making it easier to handle high volumes of data and ensuring reliable data retrieval for the application.
 
-
 ## Endpoints
 
 ### `GET http://localhost:3000/transactions?address={address}`
+
 **Response:**
 
 ```ts
@@ -72,6 +73,7 @@ I chose to use Infura for this test because it provides a reliable and scalable 
 ```
 
 ### `GET http://localhost:3000/transactions/count?address={address}`
+
 **Response:**
 
 ```ts
@@ -81,17 +83,33 @@ I chose to use Infura for this test because it provides a reliable and scalable 
 }
 ```
 
-### `http://localhost:3000/transactions/sorted?order={asc | desc}`
+### `http://localhost:3000/transactions/sorted?order={asc | desc}&page={page}&limit={limit}`
+
 **Response:**
 
 ```ts
-{
-    "sent": 0,
-    "received": 49
-}
+[
+    {
+        "id": 41,
+        "blockNumber": 27974743,
+        "index": 4,
+        "hash": "0x0da6e2af2b8298c4e46a41e31cc34b473a1f10ff4df68c85ca4b79ef829d2afa",
+        "type": 0,
+        "to": "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3",
+        "from": "0xD0dB1f4BD228f09A5E0dBf72e90967ab25cF651b",
+        "nonce": 8691,
+        "gasLimit": "182651",
+        "gasPrice": "28750000000",
+        "data": "0x6d0ff4950000000000000000000000000000000000000000000000...",
+        "value": "0",
+        "chainId": "43114",
+        "blockHash": "0x639c633618ac723a690f8fdc89c64719e5a2f08c50fd867a89a24cc5a6ad2dbf"
+    }, ...
+]
 ```
 
 ### `http://localhost:3000/transactions/top`
+
 **Response:**
 
 ```ts
@@ -172,6 +190,7 @@ $ npm run test
 ```
 
 ## Possible improvements
+
 - Adding support for multiple blockchains and not only Avalanche can expand the application's user base and increase its adoption. This can involve designing a generic indexing engine that can work with any blockchain that provides a JSON-RPC API.
 - Implementing authentication and authorization mechanisms can protect user data and prevent unauthorized access to sensitive information. This can involve using JWT tokens, OAuth2, or OpenID Connect to authenticate users and protect API endpoints.
 
