@@ -131,4 +131,23 @@ export class DbService {
 
     return transactions;
   }
+
+  async getAllUniqueAddresses(): Promise<string[]> {
+    const fromAddresses = await this.emFork
+      .createQueryBuilder(TransactionEntity)
+      .select('DISTINCT "from"')
+      .execute();
+
+    const toAddresses = await this.emFork
+      .createQueryBuilder(TransactionEntity)
+      .select('DISTINCT "to"')
+      .execute();
+
+    const allUniqueAddresses = new Set([
+      ...fromAddresses.map((a) => a.from),
+      ...toAddresses.map((a) => a.to),
+    ]);
+
+    return Array.from(allUniqueAddresses);
+  }
 }

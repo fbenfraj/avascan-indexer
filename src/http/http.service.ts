@@ -6,13 +6,10 @@ import { Block, BlockParams, ethers } from 'ethers';
 export class HttpService {
   private AVA_RPC_URL = `https://avalanche-mainnet.infura.io/v3`;
   public provider: ethers.JsonRpcProvider;
-  private readonly COVALENT_API_URL = 'https://api.covalenthq.com/v1';
-  private COVALENT_API_KEY: string;
 
   constructor(private configService: ConfigService) {
     const INFURA_API_KEY = this.configService.get('INFURA_API_KEY');
 
-    this.COVALENT_API_KEY = this.configService.get('COVALENT_API_KEY');
     this.provider = new ethers.JsonRpcProvider(
       `${this.AVA_RPC_URL}/${INFURA_API_KEY}`,
     );
@@ -89,5 +86,24 @@ export class HttpService {
     };
 
     return new Block(blockParams, this.provider);
+  }
+
+  async getTop100AddressesWithLargestBalance(
+    uniqueAddresses: string[],
+  ): Promise<AddressBalance[]> {
+    const balancePromises = Array.from(uniqueAddresses).map(async (address) => {
+      const balance = await this.provider.getBalance(address);
+      return { address, balance: balance.toString() };
+    });
+
+    const addressBalances: AddressBalance[] = await Promise.all(
+      balancePromises,
+    );
+
+    addressBalances.sort((a, b) => {
+      return Number(BigInt(b.balance) - BigInt(a.balance));
+    });
+
+    return addressBalances.slice(0, 100);
   }
 }

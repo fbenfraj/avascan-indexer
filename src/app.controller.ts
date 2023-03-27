@@ -1,9 +1,10 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { DbService } from './db/db.service';
+import { HttpService } from './http/http.service';
 
 @Controller('transactions')
 export class AppController {
-  constructor(private dbService: DbService) {}
+  constructor(private httpService: HttpService, private dbService: DbService) {}
 
   @Get()
   async getTransactionsSortedByValue(@Query('order') order: string) {
@@ -11,6 +12,17 @@ export class AppController {
       order,
     );
     return transactions;
+  }
+
+  @Get('top')
+  async getTop100AddressesWithLargestBalance() {
+    const uniqueAddresses = await this.dbService.getAllUniqueAddresses();
+    const top100Addresses =
+      await this.httpService.getTop100AddressesWithLargestBalance(
+        uniqueAddresses,
+      );
+
+    return top100Addresses;
   }
 
   @Get()
