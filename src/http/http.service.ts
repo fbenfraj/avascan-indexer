@@ -32,7 +32,7 @@ export class HttpService {
     const block = await this.getBlock(blockNumber);
     const transactions: ethers.TransactionResponse[] = [];
 
-    for (const txHash of block.transactions) {
+    for (const txHash of block?.transactions) {
       const tx = await this.provider.getTransaction(txHash);
       transactions.push(tx);
     }
@@ -60,8 +60,7 @@ export class HttpService {
 
     for (const blockHash of blockHashes) {
       const block = await this.provider.getBlock(blockHash, true);
-      for (const txHash 
-        of block.transactions) {
+      for (const txHash of block?.transactions) {
         promises.push(this.provider.getTransaction(txHash));
       }
     }

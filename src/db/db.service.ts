@@ -50,12 +50,30 @@ export class DbService {
   async saveTransactions(transactions: TransactionResponse[]): Promise<void> {
     try {
       await this.emFork.transactional(async (transactionalEntityManager) => {
-        const transactionEntities = transactions.map((transaction) => {
-          return this.emFork.create(TransactionEntity, transaction);
-        });
+        const transactionEntities = transactions
+          .filter((transaction) => transaction !== null)
+          .map((transaction) => {
+            return this.emFork.create(TransactionEntity, transaction);
+          });
 
         await transactionalEntityManager.persist(transactionEntities).flush();
-        this.logger.log(`Saved ${transactions.length} transactions`);
+
+        const treatedBlocks = Array.from(
+          new Set([
+            ...transactions.map((transaction) => {
+              return transaction?.blockNumber;
+            }),
+          ]),
+        );
+
+        const log =
+          treatedBlocks.length > 1
+            ? `blocks ${treatedBlocks[0]} to ${
+                treatedBlocks[treatedBlocks.length - 1]
+              }`
+            : `block ${treatedBlocks}`;
+
+        this.logger.log(`Saved ${transactions.length} transactions for ${log}`);
       });
     } catch (error) {
       this.logger.error(
