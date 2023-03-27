@@ -7,7 +7,7 @@ export class AppController {
   constructor(private httpService: HttpService, private dbService: DbService) {}
 
   @Get()
-  async getTransactionsSortedByValue(@Query('order') order: string) {
+  async getTransactionsSortedByValue(@Query('order') order: 'asc' | 'desc') {
     const transactions = await this.dbService.getTransactionsSortedByValue(
       order,
     );

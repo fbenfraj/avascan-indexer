@@ -20,6 +20,13 @@ export class DbService {
     this.emFork = this.em.fork();
   }
 
+  /**
+   * Saves an array of blocks to the database.
+   *
+   * @param blocks - The array of blocks to be saved.
+   * @returns Promise<void> - A promise that resolves when the blocks are successfully saved.
+   * @throws Error - If an error occurs while saving the blocks.
+   */
   async saveBlocks(blocks: Block[]): Promise<void> {
     const log =
       blocks.length > 1
@@ -31,7 +38,7 @@ export class DbService {
     try {
       await this.emFork.transactional(async (transactionalEntityManager) => {
         const blockEntities = blocks.map((block) =>
-          this.emFork.create(BlockEntity, block),
+          transactionalEntityManager.create(BlockEntity, block),
         );
 
         await transactionalEntityManager.persist(blockEntities).flush();
@@ -47,23 +54,26 @@ export class DbService {
     }
   }
 
+  /**
+   * Saves an array of transactions to the database.
+   *
+   * @param transactions - The array of transactions to be saved.
+   * @returns Promise<void> - A promise that resolves when the transactions are successfully saved.
+   * @throws Error - If an error occurs while saving the transactions.
+   */
   async saveTransactions(transactions: TransactionResponse[]): Promise<void> {
     try {
       await this.emFork.transactional(async (transactionalEntityManager) => {
         const transactionEntities = transactions
           .filter((transaction) => transaction !== null)
           .map((transaction: TransactionResponse) =>
-            this.emFork.create(TransactionEntity, transaction),
+            transactionalEntityManager.create(TransactionEntity, transaction),
           );
 
         await transactionalEntityManager.persist(transactionEntities).flush();
 
         const treatedBlocks = Array.from(
-          new Set([
-            ...transactions.map((transaction) => {
-              return transaction?.blockNumber;
-            }),
-          ]),
+          new Set(transactions.map((transaction) => transaction?.blockNumber)),
         );
 
         const log =
@@ -84,70 +94,124 @@ export class DbService {
     }
   }
 
+  /**
+   * Retrieves transactions by a specific address.
+   *
+   * @param address - The address for which to retrieve the transactions.
+   * @returns Promise<TransactionEntity[]> - A promise that resolves with the array of transactions related to the given address.
+   * @throws Error - If an error occurs while fetching transactions.
+   */
   async getTransactionsByAddress(
     address: string,
   ): Promise<TransactionEntity[]> {
-    const qb = this.emFork.createQueryBuilder(TransactionEntity);
-    const query = qb
-      .select('*')
-      .where({ from: address })
-      .orWhere({ to: address });
+    try {
+      const qb = this.emFork.createQueryBuilder(TransactionEntity);
+      const query = qb
+        .select('*')
+        .where({ from: address })
+        .orWhere({ to: address });
 
-    const transactions = await query.execute();
+      const transactions = await query.execute();
 
-    return transactions.sort((a, b) => {
-      if (a.blockNumber !== b.blockNumber) {
-        return a.blockNumber - b.blockNumber;
-      }
-      return a.index - b.index;
-    });
+      return transactions.sort((a, b) => {
+        if (a.blockNumber !== b.blockNumber) {
+          return a.blockNumber - b.blockNumber;
+        }
+        return a.index - b.index;
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error with fetching transactions by address. Error: `,
+        error,
+      );
+      throw error;
+    }
   }
 
-  async getTransactionCountFromAddress(address: string) {
-    const transactions = await this.getTransactionsByAddress(address);
+  /**
+   * Get the count of sent and received transactions for a given address.
+   * @param address The address for which to fetch the transaction count.
+   * @returns An object containing the count of sent and received transactions.
+   */
+  async getTransactionCountFromAddress(
+    address: string,
+  ): Promise<{ sent: number; received: number }> {
+    try {
+      const transactions = await this.getTransactionsByAddress(address);
 
-    const sentTransactions = transactions.filter(
-      (transaction) => transaction.from.toLowerCase() === address.toLowerCase(),
-    );
-    const receivedTransactions = transactions.filter(
-      (transaction) => transaction.to.toLowerCase() === address.toLowerCase(),
-    );
+      const lowercasedAddress = address.toLowerCase();
+      const sentTransactions = transactions.filter(
+        (transaction) => transaction.from.toLowerCase() === lowercasedAddress,
+      );
+      const receivedTransactions = transactions.filter(
+        (transaction) => transaction.to.toLowerCase() === lowercasedAddress,
+      );
 
-    return {
-      sent: sentTransactions.length,
-      received: receivedTransactions.length,
-    };
+      return {
+        sent: sentTransactions.length,
+        received: receivedTransactions.length,
+      };
+    } catch (error) {
+      const logger = new Logger('getTransactionCountFromAddress');
+      logger.error(
+        `Failed to get transaction count for address: ${address}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 
+  /**
+   * Get transactions sorted by value (amount of $AVAX moved) in ascending or descending order.
+   * @param order The order in which to sort the transactions, either 'asc' or 'desc'.
+   * @returns A list of sorted transactions.
+   */
   async getTransactionsSortedByValue(
-    order: string,
+    order: 'asc' | 'desc',
   ): Promise<TransactionEntity[]> {
-    const qb = this.emFork.createQueryBuilder(TransactionEntity);
-    const query = qb
-      .select('*')
-      .orderBy({ value: order === 'asc' ? 'asc' : 'desc' });
+    try {
+      const qb = this.emFork.createQueryBuilder(TransactionEntity);
+      const query = qb.select('*').orderBy({ value: order || 'desc' });
 
-    const transactions = await query.execute();
+      const transactions = await query.execute();
 
-    return transactions;
+      return transactions;
+    } catch (error) {
+      const logger = new Logger('getTransactionsSortedByValue');
+      logger.error(
+        `Failed to get transactions sorted by value in ${order} order`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 
+  /**
+   * Get all unique addresses (both 'from' and 'to') in the database without fetching all transactions.
+   * @returns A list of unique addresses.
+   */
   async getAllUniqueAddresses(): Promise<string[]> {
-    const fromAddresses = await this.emFork
-      .createQueryBuilder(TransactionEntity)
-      .select('DISTINCT "from"')
-      .execute();
+    try {
+      const fromAddresses = await this.emFork
+        .createQueryBuilder(TransactionEntity)
+        .select('DISTINCT "from"')
+        .execute();
 
-    const toAddresses = await this.emFork
-      .createQueryBuilder(TransactionEntity)
-      .select('DISTINCT "to"')
-      .execute();
+      const toAddresses = await this.emFork
+        .createQueryBuilder(TransactionEntity)
+        .select('DISTINCT "to"')
+        .execute();
 
-    const allUniqueAddresses = new Set([
-      ...fromAddresses.map((a) => a.from),
-      ...toAddresses.map((a) => a.to),
-    ]);
+      const allUniqueAddresses = new Set([
+        ...fromAddresses.map((a) => a.from),
+        ...toAddresses.map((a) => a.to),
+      ]);
 
-    return Array.from(allUniqueAddresses);
+      return Array.from(allUniqueAddresses);
+    } catch (error) {
+      const logger = new Logger('getAllUniqueAddresses');
+      logger.error('Failed to get all unique addresses', error.stack);
+      throw error;
+    }
   }
 }
