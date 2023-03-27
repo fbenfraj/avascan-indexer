@@ -9,6 +9,9 @@ export class TransactionEntity {
   blockNumber: number;
 
   @Property()
+  index: number;
+
+  @Property()
   hash: string;
 
   @Property()

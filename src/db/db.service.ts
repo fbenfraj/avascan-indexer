@@ -52,9 +52,9 @@ export class DbService {
       await this.emFork.transactional(async (transactionalEntityManager) => {
         const transactionEntities = transactions
           .filter((transaction) => transaction !== null)
-          .map((transaction) => {
-            return this.emFork.create(TransactionEntity, transaction);
-          });
+          .map((transaction: TransactionResponse) =>
+            this.emFork.create(TransactionEntity, transaction),
+          );
 
         await transactionalEntityManager.persist(transactionEntities).flush();
 
@@ -82,5 +82,40 @@ export class DbService {
       );
       throw error;
     }
+  }
+
+  async getTransactionsByAddress(
+    address: string,
+  ): Promise<TransactionEntity[]> {
+    const qb = this.emFork.createQueryBuilder(TransactionEntity);
+    const query = qb
+      .select('*')
+      .where({ from: address })
+      .orWhere({ to: address });
+
+    const transactions = await query.execute();
+
+    return transactions.sort((a, b) => {
+      if (a.blockNumber !== b.blockNumber) {
+        return a.blockNumber - b.blockNumber;
+      }
+      return a.index - b.index;
+    });
+  }
+
+  async getTransactionCountFromAddress(address: string) {
+    const transactions = await this.getTransactionsByAddress(address);
+
+    const sentTransactions = transactions.filter(
+      (transaction) => transaction.from.toLowerCase() === address.toLowerCase(),
+    );
+    const receivedTransactions = transactions.filter(
+      (transaction) => transaction.to.toLowerCase() === address.toLowerCase(),
+    );
+
+    return {
+      sent: sentTransactions.length,
+      received: receivedTransactions.length,
+    };
   }
 }

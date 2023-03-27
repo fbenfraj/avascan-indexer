@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS block_entity (
 CREATE TABLE IF NOT EXISTS transaction_entity (
   id SERIAL PRIMARY KEY,
   block_number INT,
+  index INT,
   hash VARCHAR(66),
   type INT,
   "to" VARCHAR(42),
