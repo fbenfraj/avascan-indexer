@@ -6,6 +6,14 @@ export class AppController {
   constructor(private dbService: DbService) {}
 
   @Get()
+  async getTransactionsSortedByValue(@Query('order') order: string) {
+    const transactions = await this.dbService.getTransactionsSortedByValue(
+      order,
+    );
+    return transactions;
+  }
+
+  @Get()
   async getTransactions(@Query('address') address: string) {
     const transactions = await this.dbService.getTransactionsByAddress(address);
     return transactions;
@@ -13,8 +21,6 @@ export class AppController {
 
   @Get('count')
   async getTransactionCount(@Query('address') address: string) {
-    return await this.dbService.getTransactionCountFromAddress(
-      address,
-    );
+    return await this.dbService.getTransactionCountFromAddress(address);
   }
 }

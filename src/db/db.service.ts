@@ -118,4 +118,17 @@ export class DbService {
       received: receivedTransactions.length,
     };
   }
+
+  async getTransactionsSortedByValue(
+    order: string,
+  ): Promise<TransactionEntity[]> {
+    const qb = this.emFork.createQueryBuilder(TransactionEntity);
+    const query = qb
+      .select('*')
+      .orderBy({ value: order === 'asc' ? 'asc' : 'desc' });
+
+    const transactions = await query.execute();
+
+    return transactions;
+  }
 }
