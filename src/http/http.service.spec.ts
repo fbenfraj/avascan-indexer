@@ -22,6 +22,7 @@ describe('HttpService', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(Logger.prototype, 'error').mockRestore();
   });
 
   it('should be defined', () => {
