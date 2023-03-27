@@ -63,6 +63,8 @@ export class DbService {
    */
   async saveTransactions(transactions: TransactionResponse[]): Promise<void> {
     try {
+      if (transactions.length === 0) return;
+
       await this.emFork.transactional(async (transactionalEntityManager) => {
         const transactionEntities = transactions
           .filter((transaction) => transaction !== null)
