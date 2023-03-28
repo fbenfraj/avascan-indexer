@@ -5,33 +5,33 @@ export class BlockEntity {
   @PrimaryKey()
   hash!: string;
 
-  @Property()
+  @Property({ nullable: true })
   number!: number;
 
-  @Property()
+  @Property({ nullable: true })
   timestamp!: number;
 
-  @Property()
+  @Property({ nullable: true })
   parentHash!: string;
 
-  @Property()
+  @Property({ nullable: true })
   nonce!: string;
 
-  @Property()
+  @Property({ nullable: true })
   difficulty!: bigint;
 
-  @Property()
+  @Property({ nullable: true })
   gasLimit!: bigint;
 
-  @Property()
+  @Property({ nullable: true })
   gasUsed!: bigint;
 
-  @Property()
+  @Property({ nullable: true })
   miner!: string;
 
-  @Property()
+  @Property({ nullable: true })
   extraData!: string;
 
-  @Property()
+  @Property({ nullable: true })
   baseFeePerGas!: bigint;
 }

@@ -5,42 +5,42 @@ export class TransactionEntity {
   @PrimaryKey()
   id: number;
 
-  @Property()
+  @Property({ nullable: true })
   blockNumber: number;
 
-  @Property()
+  @Property({ nullable: true })
   index: number;
 
-  @Property()
+  @Property({ nullable: true })
   hash: string;
 
-  @Property()
+  @Property({ nullable: true })
   type: number;
 
-  @Property({ columnType: 'varchar(42)' })
+  @Property({ columnType: 'varchar(42)', nullable: true })
   to: string;
 
-  @Property({ columnType: 'varchar(42)' })
+  @Property({ columnType: 'varchar(42)', nullable: true })
   from: string;
 
-  @Property()
+  @Property({ nullable: true })
   nonce: number;
 
-  @Property({ columnType: 'numeric' })
+  @Property({ columnType: 'numeric', nullable: true })
   gasLimit: bigint;
 
-  @Property({ columnType: 'numeric' })
+  @Property({ columnType: 'numeric', nullable: true })
   gasPrice: bigint;
 
-  @Property({ columnType: 'text' })
+  @Property({ columnType: 'text', nullable: true })
   data: string;
 
-  @Property({ columnType: 'numeric' })
+  @Property({ columnType: 'numeric', nullable: true })
   value: bigint;
 
-  @Property()
+  @Property({ nullable: true })
   chainId: bigint;
 
-  @Property()
+  @Property({ nullable: true })
   blockHash: string;
 }
