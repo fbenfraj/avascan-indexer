@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CacheService } from './cache.service';
 import { CACHE_MANAGER } from '@nestjs/common';
 import { Block } from 'ethers';
-import generateMockBlocks from '../utils/generateMockBlocks';
+import { generateMockBlocks } from '../utils/mocks';
 
 describe('CacheService', () => {
   let service: CacheService;

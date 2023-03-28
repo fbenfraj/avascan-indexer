@@ -8,7 +8,7 @@ import {
   AbstractSqlPlatform,
   EntityManager,
 } from '@mikro-orm/postgresql';
-import generateMockBlocks from '../utils/generateMockBlocks';
+import { generateMockBlocks } from '../utils/mocks';
 import { ConfigService } from '@nestjs/config';
 
 describe('DbService', () => {

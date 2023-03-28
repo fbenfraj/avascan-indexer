@@ -15,11 +15,10 @@ The goal is to demonstrate real-time transactions indexing for the Avalanche C-C
 
 ## Problems
 
-Ensuring that the indexer process is robust enough to handle network disruptions and API rate limits, which can lead to missed transactions and inconsistencies in the database.
-Implementing the sorting and filtering logic for the API endpoints efficiently, considering the potentially large number of transactions that may need to be processed.
-Dealing with soft forks and maintaining data consistency in the database by marking forked blocks and handling potential hidden forks.
-Ensuring that the API endpoints can handle a high volume of requests and are scalable for future growth.
-Replicating the database and the API on multiple servers without retrieving duplicate data, while maintaining data consistency and minimizing synchronization issues.
+- Ensuring that the indexer process is robust enough to handle network disruptions and API rate limits, which can lead to missed transactions and inconsistencies in the database.
+- Implementing the sorting and filtering logic for the API endpoints efficiently, considering the potentially large number of transactions that may need to be processed.
+- Ensuring that the API endpoints can handle a high volume of requests and are scalable for future growth.
+- Replicating the database and the API on multiple servers without retrieving duplicate data, while maintaining data consistency and minimizing synchronization issues.
 
 ## Solutions
 
@@ -35,7 +34,7 @@ To deploy the Indexer and API on a local Docker environment, I used Docker Compo
 - PostgreSQL, MikroORM, pgAdmin
 - EthersJS - Alchemy
 - CacheManager, Redis
-- Docker
+- Docker, Docker Compose
 - WebSocket
 - Jest
 
