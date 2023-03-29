@@ -120,6 +120,12 @@ I chose to use Infura for this test because it provides a reliable and scalable 
 ]
 ```
 
+## Prerequisites
+
+- Git
+- NodeJS
+- Docker
+
 ## Configuration
 
 - Clone the project
@@ -143,12 +149,6 @@ PGADMIN_DEFAULT_PASSWORD=root
 ```
 
 You can switch `DB_LOGS_ON` to disable database related logs (stored blocks and transactions events).
-
-## Prerequisites
-
-- Git
-- NodeJS
-- Docker
 
 ## Installation
 
