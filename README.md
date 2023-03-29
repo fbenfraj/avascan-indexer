@@ -82,7 +82,7 @@ I chose to use Infura for this test because it provides a reliable and scalable 
 }
 ```
 
-### `http://localhost:3000/transactions/sorted?order={asc | desc}&page={page}&limit={limit}`
+### `GET http://localhost:3000/transactions/sorted?order={asc | desc}&page={page}&limit={limit}`
 
 **Response:**
 
@@ -107,7 +107,7 @@ I chose to use Infura for this test because it provides a reliable and scalable 
 ]
 ```
 
-### `http://localhost:3000/transactions/top`
+### `GET http://localhost:3000/transactions/top`
 
 **Response:**
 
