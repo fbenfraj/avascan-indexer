@@ -123,16 +123,12 @@ export class DbService {
       const query = qb
         .select('*')
         .where({ from: address })
-        .orWhere({ to: address });
+        .orWhere({ to: address })
+        .orderBy({ blockNumber: 'asc', index: 'asc' });
 
       const transactions = await query.execute();
 
-      return transactions.sort((a, b) => {
-        if (a.blockNumber !== b.blockNumber) {
-          return a.blockNumber - b.blockNumber;
-        }
-        return a.index - b.index;
-      });
+      return transactions;
     } catch (error) {
       this.logger.error(
         `Error with fetching transactions by address. Error: `,
@@ -151,19 +147,19 @@ export class DbService {
     address: string,
   ): Promise<{ sent: number; received: number }> {
     try {
-      const transactions = await this.getTransactionsByAddress(address);
+      const sentTransactionsCount = await this.emFork
+        .createQueryBuilder(TransactionEntity)
+        .where({ from: address })
+        .count();
 
-      const lowercasedAddress = address.toLowerCase();
-      const sentTransactions = transactions.filter(
-        (transaction) => transaction.from.toLowerCase() === lowercasedAddress,
-      );
-      const receivedTransactions = transactions.filter(
-        (transaction) => transaction.to.toLowerCase() === lowercasedAddress,
-      );
+      const receivedTransactionsCount = await this.emFork
+        .createQueryBuilder(TransactionEntity)
+        .where({ to: address })
+        .count();
 
       return {
-        sent: sentTransactions.length,
-        received: receivedTransactions.length,
+        sent: sentTransactionsCount,
+        received: receivedTransactionsCount,
       };
     } catch (error) {
       this.logger.error(
