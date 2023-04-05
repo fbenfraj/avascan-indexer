@@ -1,17 +1,23 @@
-import { Controller, Get, Query, Logger, UseFilters } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Logger,
+  UseFilters,
+} from '@nestjs/common';
 import { DbService } from './db/db.service';
 import { CustomExceptionFilter } from './filters/custom-exception.filter';
-import { HttpService } from './http/http.service';
 
 @Controller('transactions')
 @UseFilters(CustomExceptionFilter)
-export class AppController {
-  private readonly logger = new Logger(AppController.name);
+export class AppTransactionsController {
+  private readonly logger = new Logger(AppTransactionsController.name);
 
-  constructor(private httpService: HttpService, private dbService: DbService) {}
+  constructor(private dbService: DbService) {}
 
-  @Get()
-  async getTransactions(@Query('address') address: string) {
+  @Get('address/:address')
+  async getTransactions(@Param('address') address: string) {
     if (!address) {
       this.logger.log('No address provided');
       return [];
@@ -37,17 +43,6 @@ export class AppController {
       limit * (page - 1),
     );
     return transactions;
-  }
-
-  @Get('top')
-  async getTop100AddressesWithLargestBalance() {
-    this.logger.log('Fetching top 100 addresses with largest balance');
-    const uniqueAddresses = await this.dbService.getAllUniqueAddresses();
-    const top100Addresses =
-      await this.httpService.getTop100AddressesWithLargestBalance(
-        uniqueAddresses,
-      );
-    return top100Addresses;
   }
 
   @Get('count')

@@ -1,7 +1,8 @@
 import { Module, CacheModule as RedisModule } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
+import { AppTransactionsController } from './app.transactions.controller';
+import { AppAddressesController } from './app.addresses.controller';
 import { AppService } from './app.service';
 import { WssModule } from './wss/wss.module';
 import { HttpModule } from './http/http.module';
@@ -11,8 +12,8 @@ import { DbService } from './db/db.service';
 import { WssService } from './wss/wss.service';
 import type { RedisClientOptions } from 'redis';
 import { CacheModule } from './cache/cache.module';
-import * as redisStore from 'cache-manager-redis-store';
 import { CacheService } from './cache/cache.service';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { CacheService } from './cache/cache.service';
     DbModule,
     CacheModule,
   ],
-  controllers: [AppController],
+  controllers: [AppAddressesController, AppTransactionsController],
   providers: [AppService, CacheService, HttpService, DbService, WssService],
 })
 export class AppModule {}

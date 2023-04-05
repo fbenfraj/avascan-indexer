@@ -21,7 +21,7 @@ describe('AppController (e2e)', () => {
 
   it('should list transactions made or received from 0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3 sorted by blockNumber and transactionIndex', async () => {
     return request(app.getHttpServer())
-      .get('/transactions?address=0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3')
+      .get('/transactions/address/0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3')
       .then((res) => {
         expect(res.status).toBe(200);
         expect(res.body).toEqual(
@@ -149,7 +149,7 @@ describe('AppController (e2e)', () => {
 
   it('should list of 100 addresses with largest balance that made or received a transaction', async () => {
     return request(app.getHttpServer())
-      .get('/transactions/top')
+      .get('/addresses/top')
       .then((res) => {
         expect(res.status).toBe(200);
         expect(res.body).toEqual(
